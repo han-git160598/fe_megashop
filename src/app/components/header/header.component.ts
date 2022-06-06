@@ -14,8 +14,11 @@ export class HeaderComponent implements OnInit {
   constructor(private CartService : CartService) { }
 
   ngOnInit(): void {
+    
     this.CartService.cartTotal$.subscribe( total =>{ this.CartTotal = total });
     this.CartService.cartData$.subscribe( data => this.CartData = data);
   }
-
+  deleteProducInCart(index : number) {
+    this.CartService.deleteProducInCart(index);
+  }
 }
