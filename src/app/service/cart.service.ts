@@ -165,10 +165,11 @@ export class CartService {
         if(increase){
             data.numInCart < data.product.quantity ? data.numInCart++ : data.product.quantity;
             this.cartDataClient.prodData[index].incart = data.numInCart ;
-
+            this.CalculateTotal();
             this.cartDataClient.total = this.cartDataServer.total ;
             localStorage.setItem('cart',JSON.stringify(this.cartDataClient));
             this.cartData$.next({...this.cartDataServer})
+            this.cartTotal$.next(this.cartDataServer.total);
         } else {
             if(data.numInCart === 1){
 
@@ -179,8 +180,9 @@ export class CartService {
                 } else {
                     this.cartData$.next({...this.cartDataServer});
                     this.cartDataClient.prodData[index].incart = data.numInCart;
-    
+                    this.CalculateTotal();
                     this.cartDataClient.total = this.cartDataServer.total ;
+                    this.cartTotal$.next(this.cartDataServer.total);
                     localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
                 }
             }
@@ -250,16 +252,18 @@ export class CartService {
     }
 
     checkoutCart(userId: number ){
-        this.http.post(`${this.URL_SERVER}/orders/payment`, null)
+        this.http.post(`${this.URL_SERVER}orders/payment`, null)
         .subscribe((res : any ) => {
             if(res) {
                 this.resetServerData();
-                this.http.post(`${this.URL_SERVER}/order/new`, {
+                this.http.post(`${this.URL_SERVER}orders/new`, {
                     userId: userId,
-                    products: this.cartDataClient.prodData
+                    products: this.cartDataClient.prodData  
                 }).subscribe( (data : any ) =>{
-                    this.orderService.getSingleOrder(data.order_id).then(res => {
-                        if(data.success) {
+              
+                    this.orderService.getSingleOrder(data.order_id).then((res : any) => {
+                        console.log(res);
+                        if(data.sucsses) {
                             const navigationExtras: NavigationExtras  =  {
                                 state : {
                                     messsage: data.message,
